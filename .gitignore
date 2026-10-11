@@ -1,0 +1,16 @@
+
+
+# Frontend dependencies and build files
+autocare-frontend/node_modules/
+autocare-frontend/dist/
+autocare-frontend/.env
+autocare-frontend/.env.*
+
+# Backend generated files
+autocare-backend/**/target/
+autocare-backend/**/.env
+
+# IDE files
+.vscode/
+.idea/
+*.log
