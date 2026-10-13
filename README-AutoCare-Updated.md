@@ -3,7 +3,8 @@
 ## Technology
 - Frontend: React + Vite
 - Backend: Spring Boot (Java)
-- Database: MySQL
+- Local database: MySQL
+- Render database: PostgreSQL
 
 ## Start the backend (Windows PowerShell)
 Open a terminal:
@@ -15,7 +16,7 @@ $env:Path = "$env:MAVEN_HOME\bin;$env:Path"
 mvn spring-boot:run
 ```
 
-Keep the backend terminal open. Confirm your local MySQL server is running and the database settings in `src/main/resources/application.properties` match your machine. Do not publish that file if it contains your database password.
+Keep the backend terminal open. Confirm your local MySQL server is running. Set `DB_URL`, `DB_USERNAME`, and `DB_PASSWORD` if its connection settings differ from the defaults. Do not commit database credentials.
 
 ## Start the frontend
 Open a second terminal:
@@ -28,8 +29,21 @@ npm run dev
 
 Open the local URL printed by Vite (normally `http://localhost:5173`).
 
+## Deploy the backend to Render
+
+The `render.yaml` Blueprint creates a Docker-based Spring Boot web service and a managed PostgreSQL database. From the Render dashboard, create a new Blueprint and select this repository. Render builds the backend from `autocare-backend/autocare-backend/Dockerfile`; database credentials and connection details are injected into the service automatically.
+
+After the Blueprint finishes deploying:
+
+1. Copy the backend service URL from Render.
+2. In the Vercel project for `auto-care-frontends`, add the environment variable `VITE_API_BASE_URL` with that URL (for example, `https://autocare-backend.onrender.com`), then redeploy the frontend.
+3. The backend CORS allowlist includes `https://auto-care-frontends.vercel.app`. If your Vercel production domain changes, update `CORS_ALLOWED_ORIGINS` in `render.yaml` and redeploy the Render service.
+4. Check the backend health at `<backend-service-url>/api/test`.
+
+The Render service uses the `render` Spring profile and PostgreSQL. Local runs continue to use MySQL. Render's free web service may sleep while idle, and its free database has provider-specific storage/availability limits; choose paid plans for production workloads.
+
 ## Authentication added
-- Registration and login call the Spring Boot API and store account records in MySQL.
+- Registration and login call the Spring Boot API and store account records in the configured database (MySQL locally and PostgreSQL on Render).
 - Passwords are stored as salted PBKDF2 hashes, not as plain text.
 - Successful login creates a temporary bearer session token that expires after 12 hours.
 - Vehicle and booking API routes require that token; logout revokes it.
@@ -56,7 +70,7 @@ The application now supports two backend-enforced roles:
 New accounts are created as `CUSTOMER` by default. For security, the public registration form does not let users promote themselves to mechanic. To create a mechanic account for a project demo:
 
 1. Register a separate account through AutoCare (use an email you can identify as the mechanic account).
-2. Open MySQL Workbench and connect to the same local MySQL server/database (`autocare_db`) used by the application.
+2. Connect to the database used by the app (for local development, use MySQL Workbench; for Render, use a PostgreSQL client and the database's external connection details).
 3. Run the following SQL, replacing the email with the exact email used for that account:
 
 ```sql
@@ -72,7 +86,7 @@ WHERE role IS NULL OR role = '';
 4. Log out of AutoCare, then log in again as that account. Roles are included in the login session, so an already-active session will not change roles automatically.
 5. The mechanic account should show a **Service Desk** button. It can update booking statuses and delete bookings. Customer accounts should see the booking form but not the status-edit/delete controls.
 
-If MySQL Workbench reports that `user_accounts` does not exist, start the Spring Boot backend once and log in/register so Hibernate can create/update the table, then run the SQL again.
+If the database reports that `user_accounts` does not exist, start the Spring Boot backend once and log in/register so Hibernate can create/update the table, then run the SQL again.
 
 **Important scope note:** This is action-level role-based access control. The current database schema does not yet assign each vehicle or booking to a specific customer, so records are shared across accounts. Do not describe this version as providing private per-customer data isolation. In a production deployment, add owner relationships, stricter record-level authorization, HTTPS, and durable server-side sessions.
 

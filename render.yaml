@@ -1,0 +1,39 @@
+services:
+  - type: web
+    name: autocare-backend
+    runtime: docker
+    plan: free
+    dockerfilePath: ./autocare-backend/autocare-backend/Dockerfile
+    dockerContext: ./autocare-backend/autocare-backend
+    healthCheckPath: /api/test
+    envVars:
+      - key: SPRING_PROFILES_ACTIVE
+        value: render
+      - key: CORS_ALLOWED_ORIGINS
+        value: https://auto-care-frontends.vercel.app,http://localhost:5173
+      - key: DB_HOST
+        fromDatabase:
+          name: autocare-db
+          property: host
+      - key: DB_PORT
+        fromDatabase:
+          name: autocare-db
+          property: port
+      - key: DB_NAME
+        fromDatabase:
+          name: autocare-db
+          property: database
+      - key: DB_USERNAME
+        fromDatabase:
+          name: autocare-db
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: autocare-db
+          property: password
+
+databases:
+  - name: autocare-db
+    databaseName: autocare_db
+    user: autocare_user
+    plan: free
