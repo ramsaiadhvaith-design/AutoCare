@@ -3,8 +3,7 @@
 ## Technology
 - Frontend: React + Vite
 - Backend: Spring Boot (Java)
-- Local database: MySQL
-- Render database: PostgreSQL
+- Database: PostgreSQL
 
 ## Start the backend (Windows PowerShell)
 Open a terminal:
@@ -16,7 +15,7 @@ $env:Path = "$env:MAVEN_HOME\bin;$env:Path"
 mvn spring-boot:run
 ```
 
-Keep the backend terminal open. Confirm your local MySQL server is running. Set `DB_URL`, `DB_USERNAME`, and `DB_PASSWORD` if its connection settings differ from the defaults. Do not commit database credentials.
+Keep the backend terminal open. Set `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USERNAME`, and `DB_PASSWORD` for your PostgreSQL database. Do not commit database credentials.
 
 ## Start the frontend
 Open a second terminal:
@@ -40,10 +39,10 @@ After the Blueprint finishes deploying:
 3. The backend CORS allowlist includes `https://auto-care-frontends.vercel.app`. If your Vercel production domain changes, update `CORS_ALLOWED_ORIGINS` in `render.yaml` and redeploy the Render service.
 4. Check the backend health at `<backend-service-url>/api/test`.
 
-The Render service uses the `render` Spring profile and PostgreSQL. Local runs continue to use MySQL. Render's free web service may sleep while idle, and its free database has provider-specific storage/availability limits; choose paid plans for production workloads.
+The backend uses PostgreSQL in every environment. Render's free web service may sleep while idle, and its free database has provider-specific storage/availability limits; choose paid plans for production workloads.
 
 ## Authentication added
-- Registration and login call the Spring Boot API and store account records in the configured database (MySQL locally and PostgreSQL on Render).
+- Registration and login call the Spring Boot API and store account records in PostgreSQL.
 - Passwords are stored as salted PBKDF2 hashes, not as plain text.
 - Successful login creates a temporary bearer session token that expires after 12 hours.
 - Vehicle and booking API routes require that token; logout revokes it.
@@ -70,7 +69,7 @@ The application now supports two backend-enforced roles:
 New accounts are created as `CUSTOMER` by default. For security, the public registration form does not let users promote themselves to mechanic. To create a mechanic account for a project demo:
 
 1. Register a separate account through AutoCare (use an email you can identify as the mechanic account).
-2. Connect to the database used by the app (for local development, use MySQL Workbench; for Render, use a PostgreSQL client and the database's external connection details).
+2. Connect to the PostgreSQL database used by the app with a PostgreSQL client.
 3. Run the following SQL, replacing the email with the exact email used for that account:
 
 ```sql

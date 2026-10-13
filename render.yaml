@@ -7,10 +7,8 @@ services:
     dockerContext: ./autocare-backend/autocare-backend
     healthCheckPath: /api/test
     envVars:
-      - key: SPRING_PROFILES_ACTIVE
-        value: render
       - key: CORS_ALLOWED_ORIGINS
-        value: https://auto-care-frontends.vercel.app,http://localhost:5173
+        value: https://auto-care-frontends.vercel.app
       - key: DB_HOST
         fromDatabase:
           name: autocare-db

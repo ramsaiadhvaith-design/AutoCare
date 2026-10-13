@@ -2,7 +2,10 @@
 import { useState, useEffect } from "react";
 import "./index.css";
 
-const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || "http://localhost:8080").replace(/\/+$/, "");
+const API_BASE_URL = (
+  import.meta.env.VITE_API_BASE_URL ||
+  (import.meta.env.PROD ? "https://autocare-backend-uy8p.onrender.com" : "http://localhost:8080")
+).replace(/\/+$/, "");
 
 function App() {
   const [page, setPage] = useState("home");
